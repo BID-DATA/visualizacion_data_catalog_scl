@@ -1,0 +1,63 @@
+---
+title: "Ingest and Transform"
+output: html_notebook
+---
+
+```{r}
+source('../utils.R')
+
+# Load Old Data
+marcos <- readxl::read_excel("../data/metadata_dataset_level.xlsx",
+                           sheet = 2)
+
+# Load New Dict
+dic <- readxl::read_excel("../data/metadata_dataset_level.xlsx",
+                           sheet = 1) %>% 
+    drop_na(Final.Mecovi.2.0)
+
+
+# Rename
+aux <- dic  %>% 
+  dplyr::select(PropertyMecovi, Final.Mecovi.2.0) %>% 
+  drop_na()
+rename_names <- as.character(aux$Final.Mecovi.2.0)
+names(rename_names) <- aux$PropertyMecovi
+library(data.table)
+setnames(marcos, old=names(marcos[,names(rename_names)]), 
+         new=unname(rename_names))
+
+
+# Load Old Data
+maria <- readxl::read_excel("../data/Inventario_Mecovi.xlsx",
+                           sheet = "Inventario_Mecovi", skip = 2)
+
+# Rename
+aux <- dic  %>% 
+  dplyr::select(marialaura, Final.Mecovi.2.0) %>% 
+  drop_na(Final.Mecovi.2.0) %>% 
+  drop_na()
+rename_names <- as.character(aux$Final.Mecovi.2.0)
+names(rename_names) <- aux$marialaura
+setnames(maria, old=colnames(maria[,names(rename_names)]) , 
+         new=unname(rename_names))
+
+maria$gYear <- as.numeric(maria$gYear)
+maria$intHogs <- as.numeric(maria$intHogs)
+maria$intPers <- as.numeric(maria$intPers)
+marcos$lnkManual <- as.character(marcos$lnkManual)
+
+data <- left_join(maria, marcos)# , by=c("idCountry", "titleAbr", "gYear"))
+
+# Add new Variables
+diffnames <- dic %>% drop_na(Final.Mecovi.2.0) %>% 
+  select(Final.Mecovi.2.0) %>% 
+  pull() %>% setdiff(colnames(data))
+data[,diffnames]<-NA
+
+# Reorder
+data %>% select(dic$Final.Mecovi.2.0) %>%
+  drop_na(publisher, idCountry, gYear) %>% 
+  write_csv("../data/metadata.csv")
+```
+
+

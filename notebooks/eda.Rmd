@@ -1,0 +1,52 @@
+---
+title: "Eda Metadata"
+output: html_notebook
+---
+
+```{r}
+data <- read_csv("../data/metadata.csv")
+
+
+data %>% dplyr::count(idCountry) %>% 
+  ggplot(aes(x=reorder(idCountry,n), y=n)) + 
+  geom_bar(stat="identity", position=position_dodge())+
+  ggtitle("Bases de Datos por País") +
+  scale_fill_brewer(palette="Paired") +
+  coord_flip()+
+  theme_minimal()
+
+data %>% dplyr::count(gYear) %>% 
+  ggplot(aes(x=reorder(gYear,n), y=n)) + 
+  geom_bar(stat="identity", position=position_dodge())+
+  ggtitle("Bases de Datos por Año") +
+  scale_fill_brewer(palette="Paired") +
+  coord_flip()+
+  theme_minimal()
+
+data %>% dplyr::count(study_type) %>% 
+  ggplot(aes(x=reorder(study_type,n), y=n)) + 
+  geom_bar(stat="identity", position=position_dodge())+
+  ggtitle("Bases de Datos por Año") +
+  scale_fill_brewer(palette="Paired") +
+  coord_flip()+
+  theme_minimal()
+
+ggplot(data,
+       aes(x=idCountry, colour=as.factor(gYear))) + 
+  geom_bar(position="stack", stat="count") +
+  coord_flip()+
+  ggtitle("Nivel Artículos") +
+  scale_fill_brewer(palette="Paired")+
+  theme_minimal() + 
+  xlab("")
+
+data %>% dplyr::count(gYear) %>% 
+  ggplot(aes(x=gYear, y=n)) + 
+  geom_point(color = "steelblue")+
+  ggtitle("Número de Bases de Datos por Año") +
+  scale_fill_brewer(palette="Paired") +
+  # coord_flip()+
+  theme_minimal() + xlab("Años") + ylab("Número de Encuestas")
+
+```
+
