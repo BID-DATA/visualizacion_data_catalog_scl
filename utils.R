@@ -15,8 +15,7 @@ paquetes <- c('ggplot2','tidyverse','plyr','scales','knitr',
               'kableExtra', 'ggmap','ROAuth', 'twitteR',
               'devtools', 'rtweet', 'igraph', 'tidygraph',
               'ggraph', 'networkD3','seriation', 'influenceR',
-              "jsonlite", "stringi")
+              "jsonlite", "stringi", "extrafont",
+              "ggthemes", "writexl")
 
 lapply(paquetes, instalar)
-
-
