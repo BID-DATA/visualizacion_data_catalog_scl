@@ -11,6 +11,7 @@ source("../utils.R")
 data <- read_csv("../data/metadata.csv")
 ```
 
+
 ```{r}
 data %>% dplyr::count(idCountry) %>% 
   ggplot(aes(x=reorder(idCountry,n), y=n)) + 
