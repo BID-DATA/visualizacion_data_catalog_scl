@@ -16,6 +16,7 @@ paquetes <- c('ggplot2','tidyverse','plyr','scales','knitr',
               'devtools', 'rtweet', 'igraph', 'tidygraph',
               'ggraph', 'networkD3','seriation', 'influenceR',
               "jsonlite", "stringi", "extrafont",
-              "ggthemes", "writexl")
+              "ggthemes", "writexl", "DataExplorer",
+              "tidyverse", "stats", "data.table")
 
 lapply(paquetes, instalar)

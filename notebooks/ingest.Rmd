@@ -5,8 +5,6 @@ output: html_notebook
 
 ```{r}
 source('../utils.R')
-library(stats)
-library(data.table)
 
 old_mecovi <- readxl::read_excel("../data/Inventario_Mecovi.xlsx",
                            sheet = "Inventario_Mecovi", skip = 2)
@@ -15,7 +13,11 @@ old_mecovi <- readxl::read_excel("../data/Inventario_Mecovi.xlsx",
 dic <- readxl::read_excel("../data/metadata_dataset_level.xlsx",
                            sheet = 1) %>% 
     drop_na(Final.Mecovi.2.0)
+```
 
+
+# Set new variables and recode
+```{r}
 # Rename
 aux <- dic  %>% 
   dplyr::select(Mecovi, Final.Mecovi.2.0) %>% 
@@ -27,12 +29,6 @@ names(rename_names) <- aux$Mecovi
 setnames(old_mecovi, old=colnames(old_mecovi[,names(rename_names)]) , 
          new=unname(rename_names))
 
-```
-
-
-
-```{r}
-# Recode
 old_mecovi$gYear <- as.numeric(old_mecovi$gYear)
 old_mecovi$intHogs <- as.numeric(old_mecovi$intHogs)
 old_mecovi$intPers <- as.numeric(old_mecovi$intPers)
@@ -43,13 +39,73 @@ diffnames <- dic %>% drop_na(Final.Mecovi.2.0) %>%
   pull() %>% setdiff(colnames(old_mecovi))
 old_mecovi[,diffnames]<-NA
 
-# Preprocessing
-
-# Reorder
-old_mecovi %>% select(dic$Final.Mecovi.2.0) %>%
-  drop_na(idCountry, gYear) %>% 
-  writexl::write_xlsx("../data/metadata_scl.xlsx")
+old_mecovi <- old_mecovi %>% select(dic$Final.Mecovi.2.0)
+colnames(old_mecovi)
 ```
 
+# Preprocessing
+```{r}
+ingles <- c("Bahamas", "Barbados","Belize",
+            "Jamaica", "St. Lucía", "Trinidad y Tobago", 
+            "Suriname", "Guyana", "Dominica")
+
+
+old_mecovi <- old_mecovi %>% 
+  mutate(topic = study_type,
+         collection_title = "Censos y encuestas harmonizadas",
+         # collection_title = if_else(grepl("house|hogar",title,ignore.case=T), 
+         # "Mecovi Household Surveys Databank", ""),
+         collection_description = "Censos y encuestas harmonizadas",
+         division = 'SCL',
+         LocationType = "National",
+         
+         #Access Rights
+         accessRights = dplyr::recode(accessRights,  "público"="Public Data",
+                                      "restringido"="Restricted Data",
+                                      "base no disponible"="Not Available",
+                                      "?" = 'NA'),
+         accessRights = if_else(idCountryAbr %in%
+                                  c("BHS", "BLZ","BRB","HND",
+                                    "DMA", "GUY", "SUR", "LCA"), 
+                                "Restricted Data", accessRights),
+         
+         issued = gYear,
+         accrualPeriodicity = if_else(accrualPeriodicity == "trimestral", "Trimestral",
+                                     accrualPeriodicity),
+         
+         data_type = "Microdata",
+         study_type = if_else(grepl("census|censo",title,ignore.case=T), "Census",
+                              "Survey"),
+         study_subtype = if_else(study_type=="Census", "Cross-sectional", "NA"),
+         study_subtype = if_else(study_subtype == "panel", "Panel", study_subtype),
+         topic = dplyr::recode(topic, "Censo"='NA'),
+         topic = if_else(titleAbr=="MICS", "Multiple Indicator Cluster Surveys", topic),
+         topic = if_else(titleAbr=="ECV", "Living Conditions Surveys", topic),
+         language = ifelse(idCountry %in% ingles, "English", 
+                                ifelse(idCountry=="Brasil" , "Portugues",
+                                        ifelse(idCountry == 'Haiti', "Frances", "Spanish"))))  
+
+
+
+
+# Reorder
+old_mecovi <- old_mecovi %>% select(dic$Final.Mecovi.2.0) %>%
+  drop_na(idCountry, gYear) %>% 
+  arrange(gYear, idCountry,txtRound)
+```
+
+```{r}
+old_mecovi %>% dplyr::count(idCountry, publisher, title) %>% 
+  dplyr::count(idCountry) %>% 
+  kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+
+old_mecovi  %>% plot_missing() 
+```
+
+```{r}
+old_mecovi %>% 
+  writexl::write_xlsx("../data/metadata_scl.xlsx")
+```
 
 
