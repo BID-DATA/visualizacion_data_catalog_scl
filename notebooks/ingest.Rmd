@@ -3,12 +3,15 @@ title: "Ingest and Transform"
 output: html_notebook
 ---
 
+# Process to restructure the mecovi metadata DB to new version
+
+
+## Ingest mecovi and new dictionary
 ```{r}
 source('../utils.R')
 
 old_mecovi <- readxl::read_excel("../data/Inventario_Mecovi.xlsx",
                            sheet = "Inventario_Mecovi", skip = 2)
-
 # Load New Dict
 dic <- readxl::read_excel("../data/metadata_dataset_level.xlsx",
                            sheet = 1) %>% 
@@ -16,7 +19,7 @@ dic <- readxl::read_excel("../data/metadata_dataset_level.xlsx",
 ```
 
 
-# Set new variables and recode
+## Set new variables and recode
 ```{r}
 # Rename
 aux <- dic  %>% 
@@ -41,15 +44,12 @@ old_mecovi[,diffnames]<-NA
 
 old_mecovi <- old_mecovi %>% select(dic$Final.Mecovi.2.0)
 colnames(old_mecovi)
-```
+
 
 # Preprocessing
-```{r}
 ingles <- c("Bahamas", "Barbados","Belize",
             "Jamaica", "St. Lucía", "Trinidad y Tobago", 
             "Suriname", "Guyana", "Dominica")
-
-
 old_mecovi <- old_mecovi %>% 
   mutate(topic = study_type,
          collection_title = "Censos y encuestas harmonizadas",
@@ -84,28 +84,33 @@ old_mecovi <- old_mecovi %>%
          language = ifelse(idCountry %in% ingles, "English", 
                                 ifelse(idCountry=="Brasil" , "Portugues",
                                         ifelse(idCountry == 'Haiti', "Frances", "Spanish"))))  
-
-
-
-
 # Reorder
 old_mecovi <- old_mecovi %>% select(dic$Final.Mecovi.2.0) %>%
   drop_na(idCountry, gYear) %>% 
   arrange(gYear, idCountry,txtRound)
 ```
 
+## Define who should fill the database 
 ```{r}
-old_mecovi %>% dplyr::count(idCountry, publisher, title) %>% 
-  dplyr::count(idCountry) %>% 
-  kable() %>%
-  kable_styling(bootstrap_options = c("striped", "hover"))
-
-old_mecovi  %>% plot_missing() 
+# old_mecovi %>% dplyr::count(idCountry, publisher, title) %>% 
+#   dplyr::count(idCountry) %>% 
+#   kable() %>%
+#   kable_styling(bootstrap_options = c("striped", "hover"))
+# old_mecovi  %>% plot_missing() 
+# x <- c("angela", "alvaro", "stephanie", "daniela")
+# temp <- old_mecovi %>%
+#   dplyr::count(idCountry, publisher, title) %>% 
+#   mutate(encargado = sort(rep(x, 37))) %>% 
+#   select(-n) 
+# temp %>% write_csv("encargados.csv")
 ```
 
+## Export
 ```{r}
+# old_mecovi %>% 
+#   writexl::write_xlsx("../data/metadata_scl.xlsx")
 old_mecovi %>% 
-  writexl::write_xlsx("../data/metadata_scl.xlsx")
+  write_csv("../data/metadata_scl.csv")
 ```
 
 

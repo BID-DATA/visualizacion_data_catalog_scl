@@ -1,22 +1,17 @@
 #!/usr/bin/env Rscript
 ########################################
-## Instalación y preparación de Ambiente
+## Installation and preparation of environment
 ########################################
 
-# Instalar los paquetes usados en este repositorio
-instalar <- function(paquete) {
-  if (!require(paquete,character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)) {
-    install.packages(as.character(paquete), repos = "http://cran.us.r-project.org")
-    library(paquete, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)
+# Install the packages used in this repository
+install_me <- function(me) {
+  if (!require(me,character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)) {
+    install.packages(as.character(me), repos = "http://cran.us.r-project.org")
+    library(me, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)
   }
 }
 
-paquetes <- c('ggplot2','tidyverse','plyr','scales','knitr', 
-              'kableExtra', 'ggmap','ROAuth', 'twitteR',
-              'devtools', 'rtweet', 'igraph', 'tidygraph',
-              'ggraph', 'networkD3','seriation', 'influenceR',
-              "jsonlite", "stringi", "extrafont",
-              "ggthemes", "writexl", "DataExplorer",
-              "tidyverse", "stats", "data.table")
+libraries <- c('ggplot2','tidyverse','plyr','scales','knitr', 
+              'kableExtra', "tidyverse", "stats", "data.table")
 
-lapply(paquetes, instalar)
+lapply(libraries, install_me)

@@ -8,7 +8,8 @@ output:
 ```{r, echo = T, results = 'hide', warning=FALSE, include=FALSE}
 # Load Dataset
 source("../utils.R")
-data <- read_csv("../data/metadata.csv")
+data <- read_csv("../data/metadata_scl.csv")
+
 ```
 
 
@@ -25,10 +26,9 @@ data %>% dplyr::count(idCountry) %>%
 
 
 ```{r}
-data %>% dplyr::count(gYear) %>% 
-  ggplot(aes(x=gYear, y=n)) + 
-  geom_point(color = "steelblue")+
-  scale_fill_brewer(palette="Paired") +
+data %>%  
+  ggplot(aes(x=gYear)) + 
+  geom_bar() + 
   theme_minimal() +
   ggtitle("Número de Bases de Datos por Año") + 
   xlab("Años") + 
@@ -36,8 +36,8 @@ data %>% dplyr::count(gYear) %>%
 ```
 
 ```{r}
-tmp <- data %>% group_by(idCountry) %>% 
-    mutate(countT= n()) %>%
+tmp <- data %>% dplyr::group_by(idCountry) %>% 
+    dplyr::mutate(countT= n()) %>%
     group_by(gYear, add=TRUE) %>%
     dplyr::summarize(n = n(),
                      countT = min(countT)) %>% 
@@ -49,8 +49,6 @@ tmp %>% ggplot() + geom_bar(aes(y = pecentage, x = idCountry,
   ggtitle("Porcentaje de Bases de Datos por Año - País") + 
   xlab("País") + 
   ylab("Porcentaje")  
-
-
 
 ```
 
